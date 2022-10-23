@@ -1,0 +1,440 @@
+# tdcstyle
+
+Is a styler which makes data.table syntax in particular nicer. Here's some example of desirable style:
+
+```{r}
+  donors[
+    is.na(remove_dm1)
+    & is.na(remove_dm2),
+    .N,
+    keyby = pack]
+
+  donors[
+    is.na(remove_dm1)
+    & is.na(remove_dm2),
+    let(new_var = "test",
+        new_var2 = "test2")]
+
+  donors[,
+    let(new_var = "test")]
+```
+
+
+## Using {styler}
+
+Presumably the styler will be built on the [{styler}](https://styler.r-lib.org/) package.
+
+### Customising Styler
+
+```{r}
+  library(magrittr)
+  library(styler)
+  library(dplyr)
+  cache_deactivate()
+
+  is_dt_expr <- function(pd_flat) {
+    all(c("'['", "']'") %in% pd_flat$token)
+  }
+
+  my_styler <- function(pd_flat) {
+    if(is_dt_expr(pd_flat)) {
+      pd_flat$spaces[pd_flat$token_after == "']'"] <- 0
+      pd_flat$newlines[pd_flat$token_after == "']'"] <- 0
+      pd_flat$lag_newlines[pd_flat$token == "']'"] <- 0
+      browser()
+    }
+
+    pd_flat
+  }
+
+my_style <- function(are_you_sure) {
+  create_style_guide(
+    space = tibble::lst(my_styler =
+    if (are_you_sure) my_styler),
+    style_guide_name = "my_style@https://github.com/r-lib/styler",
+    style_guide_version = read.dcf(here::here("DESCRIPTION"))[, "Version"]
+  )
+}
+
+string_to_format <-
+"dt[
+  is.na(remove_na1),
+  ]"
+style_text(string_to_format, style = my_style, are_you_sure = TRUE)
+
+```
+
+
+# Example from Dan:
+
+```{r}
+library(data.table)
+library(lubridate)
+library(tdcfun)
+library(readxl)
+library(mgcv)
+library(scales)
+library(glue)
+library(fst)
+
+charity <- "MSFNZ"
+
+date_dm1 <- as.Date("2022-11-07")
+date_dm2 <- as.Date("2022-11-28")
+date_nl1 <- as.Date("2022-12-13")
+
+# Import data -------------------------------------------------------------
+path <- "../../msf_au/standard_refresh/data"
+major_donors <- read_fst(glue("{path}/major_donors.fst"), as.data.table = TRUE)
+trans <- read_fst(glue("{path}/trans.fst"), as.data.table = TRUE)
+rgtable <- read_fst(glue("{path}/rgtable.fst"), as.data.table = TRUE)
+donors <- read_fst(glue("{path}/donors.fst"), as.data.table = TRUE)
+exclusions <- read_fst(glue("{path}/exclusions.fst"), as.data.table = TRUE)
+suppress_md <- read_fst(glue("{path}/suppress_md.fst"), as.data.table = TRUE)
+refresh_date <- readRDS(glue("{path}/refresh_date.Rds"))
+
+dataro_scores <- read_fst(glue("{path}/msf_dataro_dm.fst"), as.data.table = TRUE)
+dataro_scores[
+  , let(urn = as.character(Constituent.ID),
+        score_dm = `Constituent.Specific.Attributes.Dataro.DM.Appeal.Description`,
+        rank_dm = `Constituent.Spe.Attributes.Dataro.DM.Appeal.Rank.Description`,
+        score_500 = Constituent.Spe.ttributes.Dataro.DM.Appeal...500.Description,
+        rank_500 = Constituent.Spe.utes.Dataro.DM.Appeal...500.Rank.Description,
+        score_rg = Constituent.Spe..Attributes.Dataro.Convert.to.RG.Description,
+        rank_rg = Constituent.Spe.ibutes.Dataro.Convert.to.RG.Rank.Description)]
+
+donors[, `:=`(clean_home = gsub("\\D", "", phone_home),
+              clean_work = gsub("\\D", "", phone_work),
+              clean_mobile = gsub("\\D", "", phone_mobile))]
+
+add_hag(
+  donors = donors,
+  trans = trans,
+  classification_codes = c(5, 37, 40),
+  refresh_date = refresh_date,
+  prefix = "cashemerg")
+
+# Apply exclusions --------------------------------------------------------
+brief <- last(list.files(
+  path = "brief",
+  pattern = "data_brief.*xlsx$",
+  full.names = TRUE))
+
+## identify current set of exclusions from refresh ----
+new_exclusions <- exclusions[
+  , .(donor_count = uniqueN(urn)),
+  .(group, exclusion_code, description)]
+
+## identify exclusions to be pasted into worksheet ----
+dkfunctions::update_exclusions(
+  new_exclusions = new_exclusions,
+  brief = brief)[] %>%
+  copy_data(header = FALSE)
+
+# import data exclusions from spreadsheet ----
+appeal_excl <- setDT(read_excel(brief, "Exclusions", skip = 3))
+
+# add exclusion reasons to donor table
+targeting_add_wave_removals(donors, exclusions, appeal_excl)
+
+# manual exclusions -------------------------------------------------------
+remove_cols <- grep("remove_\\w{3}$", colnames(donors), value = TRUE)
+
+## remove AU donors ----
+donors[
+  flag_nzdonor == 0,
+  (remove_cols) := lapply(.SD, function(x) {
+    ifelse(is.na(x), "905-Non New Zealand Address", x)}),
+  .SDcols = remove_cols]
+
+## Workplace givers ----
+excl_workplace <- trans[classification_code == 30, urn]
+donors[
+  urn %in% excl_workplace,
+  (remove_cols) := lapply(.SD, function(x) {
+    ifelse(is.na(x), "990-Workplace Givers", x)}),
+  .SDcols = remove_cols]
+
+## cash donors with TM/F2F gifts only ----
+tmp_f2fphone <- trans[
+  appeal_code %ilike% "NZ"
+  & classification_code %in% c(5, 37, 40)
+  & channel_code %in% c(3, 10),
+  urn]
+tmp_other <- trans[
+  appeal_code %ilike% "NZ"
+  & classification_code %in% c(5, 37, 40)
+  & !channel_code %in% c(3, 10),
+  urn]
+donors[
+  urn %in% tmp_f2fphone
+  & !urn %in% tmp_other,
+  (remove_cols) := lapply(.SD, function(x) {
+    ifelse(is.na(x), "991-F2F/Phone only gifts", x)}),
+  .SDcols = remove_cols]
+
+## remove RG Active records from DM1/DM2
+remove_dm_cols <- grep("remove_dm", colnames(donors), value = TRUE)
+donors[
+  donor_type == "rg"
+  & rg_active_flag == 1,
+  (remove_dm_cols) := lapply(.SD, function(x) {
+    ifelse(is.na(x), "993-RG Active Donors", x)}),
+  .SDcols = remove_dm_cols]
+
+
+## exclude RTS records ----
+tmp_rts <- rbindlist(
+  list(
+    setDT(read_excel("data/2022 MSF Supporters C5 GNAs_12 Oct 22.xlsx"))[, urn := ID],
+    read_excel("data/RTS-NZ_6 October 22.xlsx", col_names = "urn")
+  ),
+  fill = TRUE)
+donors[
+  urn %in% tmp_rts$urn,
+  (remove_cols) := lapply(.SD, function(x) {
+    ifelse(is.na(x), "992-RTS Records", x)}),
+  .SDcols = remove_cols]
+
+## exclude manual major donors
+tmp_major <- setDT(read_excel("data/20221013 MD NZ SUMMER SUPPRESSIONS.xlsx"))
+donors[
+  urn %in% tmp_major$`Constituent ID`,
+  (remove_cols) := lapply(.SD, function(x) {
+    ifelse(is.na(x), "915-Major Donors", x)}),
+  .SDcols = remove_cols]
+
+# build exclusion counts for brief ----------------------------------------
+exclusion_summary <- targeting_summarise_wave_removals(appeal_excl, donors)
+export_cols <- grep("remove_\\w{3}$", colnames(exclusion_summary), value = TRUE)
+exclusion_summary[, .SD, .SDcols = export_cols] %>%
+  copy_data(header = FALSE, remote = remote)
+
+# Determine inclusions (MAIL) ---------------------------------------------
+# NOTE: Update to reflect the contact strategy provided by client.
+# Update to separate out NL Mail audiences from NZ audiences
+
+donors[, let(force_include = "N", force_reason = NA_character_, pack = "SV")]
+
+## Cash / Emerg HAG last 2 years > $1,000 - set to mid value ----
+donors[
+  is.na(force_reason)
+  & is.na(remove_dm1)
+  & cashemerg_hag_amount >= 1000,
+  let(force_include = "Y",
+      force_reason = "01. High Mid Value Cash/Emerg",
+      pack = "MV")]
+
+## Cash / Emerg HAG last 2 years > $250 - set to mid value ----
+donors[
+  is.na(force_reason)
+  & is.na(remove_dm1)
+  & cashemerg_hag_amount >= 250,
+  let(force_include = "Y",
+      force_reason = "02. Mid Value Cash/Emerg",
+      pack = "MV")]
+
+## Any Active RG Only donor with gift is $250-$4000 in the last 2 years ----
+tmp_hv_trans <- trans[
+  amount >= 200
+  & date >= refresh_date %m-% months(24),
+  urn]
+donors[
+  is.na(force_reason)
+  & is.na(remove_dm1)
+  & donor_type == "rg"
+  & urn %in% tmp_hv_trans,
+  let(force_include = "Y",
+      force_reason = "03. Lapsed RG Only gifts $200-$4,000",
+      pack = "MV")]
+
+## dataro_dm ----
+donors[
+  dataro_scores,
+  on = .(urn),
+  let(dataro_dm_rank = i.rank_dm,
+      dataro_dm_score = i.score_dm,
+      dataro_500_score = i.score_500)]
+donors[
+  is.na(remove_dm1)
+  & (dataro_dm_score >= 0.005 | dataro_500_score >= 0.0025),
+  let(force_include = "Y",
+      force_reason = ifelse(is.na(force_reason), "91. Dataro DM Audience", force_reason),
+      targeted_dataro = "Y")]
+
+## Seeds ----
+donors[
+  segment_code == "Z999"
+  & !is.na(addr_line1),
+  let(force_include = "Y",
+      force_reason = "99. Seeds",
+      targeted_tdc = "Y",
+      targeted_dataro = "Y")]
+
+# donors[is.na(remove_dm1), .N, k = force_reason]
+
+# Determine inclusions (NEWSLETTER - NZ) -----------------------------------
+donors[
+  flag_nzdonor == 1,
+  let(nl_force = "N",
+      nl_group = NA_character_)]
+
+## Active rgcash donors (0-12; cash recency) ----
+tmp_group <- donors[
+  donor_type == "rgcash"
+  & rg_active_flag == 1
+  & cash_recency == "0-12",
+  urn]
+donors[
+  is.na(nl_group)
+  & is.na(remove_nl1)
+  & urn %in% tmp_group,
+  let(nl_force = "Y",
+      nl_group = "01. Active RG + Cash 0-12")]
+
+## Active rgcash donors (13-24; cash recency) ----
+tmp_group <- donors[
+  donor_type == "rgcash"
+  & rg_active_flag == 1
+  & cash_recency == "13-24",
+  urn]
+donors[
+  is.na(nl_group)
+  & is.na(remove_nl1)
+  & urn %in% tmp_group,
+  let(nl_force = "Y",
+      nl_group = "02. Active RG + Cash 13-24")]
+
+## active FP ----
+tmp_group <- donors[
+  rg_active_flag == 1
+  & rg_flag == 1,
+  urn]
+donors[
+  is.na(nl_group)
+  & is.na(remove_nl1)
+  & flag_nzdonor == 1
+  & urn %in% tmp_group,
+  let(nl_force = "Y",
+      nl_group = "03. Active Field Partners")]
+
+## cash donors 0-12 ----
+tmp_group <- donors[
+  donor_type == "cash"
+  & cash_recency %in% c("0-12")
+  & flag_nzdonor == 1,
+  urn]
+donors[
+  is.na(nl_group)
+  & is.na(remove_nl1)
+  & flag_nzdonor == 1
+  & urn %in% tmp_group,
+  let(nl_force = "Y",
+      nl_group = "04. Cash Donors; 0-12")]
+
+## confirmed bequesters ok to mail ----
+tmp_group <- exclusions[
+  description %in% c("Confirmed", "Re-Confirmed", "Intender", "Enquirer",
+                    "Prospect"),
+  urn]
+donors[
+  is.na(nl_group)
+  & is.na(remove_nl1)
+  & flag_nzdonor == 1
+  & urn %in% tmp_group,
+  let(nl_force = "Y",
+      nl_group = "05. Has Bequest status")]
+
+# seeds
+tmp_group <- donors[
+  segment_code == "Z999"
+  & !is.na(addr_line1),
+  urn]
+donors[
+  flag_nzdonor == 1
+  & urn %in% tmp_group,
+  let(nl_force = "Y",
+      nl_group = "99. NZ Seeds")]
+
+donors[flag_nzdonor == 1 & is.na(remove_nl1) & ! is.na(nl_group), .N, keyby = nl_group]
+donors[flag_nzdonor == 1 & is.na(remove_nl1) & ! is.na(nl_group), .N]
+
+# Identify available mail counts (NZ) -------------------------------------
+
+# available donor w1
+donors[
+  is.na(remove_dm1)
+  & flag_nzdonor == 1,
+  .N,
+  keyby = .(segment_code, force_include)] %>%
+  dcast(segment_code ~ force_include, fill = 0) %>%
+  copy_data()
+
+# available donors w2
+donors[
+  is.na(remove_dm2) & flag_nzdonor == 1,
+  .N,
+  keyby = .(segment_code, force_include)] %>%
+  dcast(segment_code ~ force_include, fill = 0) %>%
+  copy_data()
+
+# available donors nl
+donors[
+  is.na(remove_nl1) & !is.na(nl_group) & flag_nzdonor == 1,
+  .N,
+  keyby = .(segment_code, nl_force)] %>%
+  dcast(segment_code ~ nl_force, fill = 0) %>%
+  copy_data()
+
+# # Rolling $5K check -------------------------------------------------------
+# tmp_tx <- trans[date >= floor_date(Sys.Date() %m-% months(24), "months"),
+#                 .(amount = sum(amount)),
+#                 by = .(urn, month = as.POSIXct(floor_date(date, "months")))]
+# mDT = tmp_tx[, .(month = seq(min(month), max(month), by = "month")), by = urn]
+# dt_tx <- tmp_tx[mDT, on = names(mDT)]
+# dt_tx[, amount := replace(amount, is.na(amount), 0)]
+
+# dt_tx[, rsum := frollsum(amount, 12), by = urn]
+# dt_5K <- dt_tx[rsum >= 5000]$urn
+# tmp_wide_tx <- dcast(dt_tx[!is.na(rsum)], urn ~ month, value.var = "rsum")
+# dt_tx_5K <- tmp_wide_tx[urn %in% dt_5K]
+
+# tmp_urns <- donors[is.na(remove_dm1) & flag_nzdonor == 1, urn]
+
+# filename <- glue("MSF_5K_checks_{Sys.Date()}.xlsx")
+# dt_tx_5K[urn %in% tmp_urns] %>%
+#   writexl::write_xlsx(paste0("data_out/", filename))
+
+# # zip 5K checks
+# zip_file(filename, "data_out", tdccreds::get_creds("msf_zips")$password)
+
+# zip targeting brief -----------------------------------------------------
+filename <- last(list.files("brief", "*.xlsx$"))
+zip_file(filename, "brief", tdccreds::get_creds("msf_zips")$password)
+
+# Functions ---------------------------------------------------------------
+
+calc_last_gift <- function(
+  x,
+  classification_codes = NULL,
+  max_date = Sys.Date()) {
+
+  if (length(classification_codes) > 0) {
+    x <- x[classification_code %in% classification_codes]
+  }
+
+  x <- x[date < max_date]
+
+    setkey(x, date)
+  x[x[, .I[.N], urn]$V1, .SD, urn]
+}
+
+calc_barcode <- function(urn, fundid, appealid) {
+  tmp_num <- paste0(urn, fundid, appealid)
+  check_digit <- lapply(strsplit(tmp_num, ""), function(x) {sum(as.numeric(x)) %% 10})
+
+  paste0("A", sprintf("%07d", urn), sprintf("%05d", fundid), sprintf("%05d", appealid), check_digit)
+}
+
+
+```
