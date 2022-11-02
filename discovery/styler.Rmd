@@ -30,13 +30,20 @@ Presumably the styler will be built on the [{styler}](https://styler.r-lib.org/)
   library(magrittr)
   library(styler)
   library(dplyr)
-  cache_deactivate()
 
   is_dt_expr <- function(pd_flat) {
     all(c("'['", "']'") %in% pd_flat$token)
   }
 
   my_styler <- function(pd_flat) {
+
+    # if open and close [] on same line, do nothing?
+    # if comma follows [, remove new lines between
+    # if some other expression push it down to newline
+    # if filter expression contains & or | at paren level 0, insert a newline before each
+
+
+    # pull up the last ]
     if(is_dt_expr(pd_flat)) {
       pd_flat$spaces[pd_flat$token_after == "']'"] <- 0
       pd_flat$newlines[pd_flat$token_after == "']'"] <- 0
@@ -60,9 +67,142 @@ string_to_format <-
 "dt[
   is.na(remove_na1),
   ]"
-style_text(string_to_format, style = my_style, are_you_sure = TRUE)
+
+
+string_to_format_2 <-
+'donors[
+  is.na(force_reason) & is.na(remove_dm1) & cashemerg_hag_amount >= 1000,
+  let(force_include = "Y",
+      force_reason = "01. High Mid Value Cash/Emerg",
+      pack = "MV"
+      )
+  ]
+'
+
+style_text(string_to_format_2, style = my_style, are_you_sure = TRUE)
+
+styler::style_text(string_to_format_2, style = tidyverse_style)
+
 
 ```
+# Questions?
+
+How does styler manage whitespace?
+
+In this code:
+
+```r
+donors[
+  is.na(force_reason) & is.na(remove_dm1) & cashemerg_hag_amount >= 1000,
+  let(force_include = "Y",
+      force_reason = "01. High Mid Value Cash/Emerg",
+      pack = "MV"
+      )
+  ]
+```
+
+tidyverse_style produces:
+
+```r
+donors[
+  is.na(force_reason) & is.na(remove_dm1) & cashemerg_hag_amount >= 1000,
+  let(
+    force_include = "Y",
+    force_reason = "01. High Mid Value Cash/Emerg",
+    pack = "MV"
+  )
+]
+```
+
+One candidate is: `set_line_break_after_opening_if_call_is_multi_line`
+
+```r
+tidyverse_style()$line_break$set_line_break_after_opening_if_call_is_multi_line
+styler:::set_line_break_after_opening_if_call_is_multi_line
+```
+
+So what happens if we remove this rule?
+
+```r
+transformers <- tidyverse_style()
+transformers$line_break$set_line_break_after_opening_if_call_is_multi_line <- NULL
+
+styler::style_text(string_to_format_2, transformers = transformers)
+```
+
+We get:
+
+```r
+donors[
+  is.na(force_reason) & is.na(remove_dm1) & cashemerg_hag_amount >= 1000,
+  let(force_include = "Y",
+    force_reason = "01. High Mid Value Cash/Emerg",
+    pack = "MV"
+  )
+]
+```
+
+What indentation rule could be used to fix this?
+
+```r
+ls(transformers)
+transformers$indention
+indent_funs <- transformers$indention
+ls(indent_funs)
+transformers$indention <- list(
+  indent_braces = indent_funs$indent_braces
+)
+
+styler::style_text(string_to_format_2, transformers = transformers)
+```
+
+Looks like indent_braces is how it works.
+
+```r
+debug(styler:::indent_braces)
+
+styler::style_text(string_to_format_2, transformers = transformers)
+
+```
+
+the code for indent_braces:
+
+```r
+    indent_indices <- compute_indent_indices(pd, token_opening = c("'('",
+        "'['", "'{'"), token_closing = c("')'", "']'", "'}'"))
+    pd$indent[indent_indices] <- pd$indent[indent_indices] +
+        indent_by
+    set_unindention_child(pd, token = "')'", unindent_by = indent_by)
+
+    pd$child
+    pd[-indent_indices, ]
+    pd
+```
+
+So we'll have a hard time creating an indent rule that can work at high and low
+level. Because the amount to be indented by under our ideal would be variable,
+but the variable is unknown at the level of context where the indentation is
+applied.
+
+So I think a sensible approach might be to make a data.table specific styler that assumes code has already been styled by tidyverse?
+
+# Styler working order
+
+from: https://styler.r-lib.org/articles/customizing_styler.html
+
+> The sequence in which styler applies rules on each level of nesting is given in the list below:
+>
+>    call default_style_guide_attributes() to initialize some variables.
+>
+>    modify the line breaks (modifying lag_newlines only based on token, token_before, token_after and text).
+>
+>    modify the spaces (modifying spaces only based on lag_newlines, newlines, multi_line, token, token_before, token_after and text).
+>
+>    modify the tokens (based on newlines lag_newlines, spaces multi_line, token, token_before, token_after and text).
+>
+>    modify the indention by changing indention_ref_id (based on newlines lag_newlines, spaces multi_line, token, token_before, token_after and text).
+
+
 
 
 # Example from Dan:
