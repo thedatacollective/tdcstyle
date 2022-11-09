@@ -14,10 +14,10 @@ style_dt_line_break <- function(pd) {
     pd$lag_newlines[pd$token == "']'"] <- 0L
 
     # if , follows the first [ - move it up.
-    first_comma_idx <- first(which(pd$token == "','"))
-    if (pd$token_before[first_comma_idx] == "'['") {
-      pd$newlines[first_comma_idx - 1] <- 0L
-      pd$lag_newlines[first_comma_idx] <- 0L
+    first_bracket_idx <- first(which(pd$token == "'['"))
+    if (pd$token_after[first_bracket_idx] == "','") {
+      pd$newlines[first_bracket_idx] <- 0L
+      pd$lag_newlines[first_bracket_idx + 1] <- 0L
     }
 
     # if it has compound filter with & and | split those onto new lines
