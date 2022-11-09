@@ -38,26 +38,20 @@ string_to_format_4 <-
 # styler: on
 
   styler::cache_deactivate()
-  transformers <- styler::tidyverse_style()
-
-  transformers$line_break <- c(transformers$line_break, style_dt_line_break = style_dt_line_break)
-  transformers$space <- c(transformers$space, style_dt_space = style_dt_space)
-  transformers$token <- c(transformers$token, style_dt_token = style_dt_token)
-  transformers$indention <- c(transformers$indention, style_dt_indentation = style_dt_indention)
 
   print(
-    styler::style_text(string_to_format, transformers = transformers)
+    styler::style_text(string_to_format, style = tdc_style)
   )
 
   print(
-    styler::style_text(string_to_format_2, transformers = transformers)
+    styler::style_text(string_to_format_2, style = tdc_style)
   )
 
   print(
-    styler::style_text(string_to_format_3, transformers = transformers)
+    styler::style_text(string_to_format_3, style = tdc_style)
   )
 
   print(
-    styler::style_text(string_to_format_4, transformers = transformers)
+    styler::style_text(string_to_format_4, style = tdc_style)
   )
 })
