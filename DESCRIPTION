@@ -1,6 +1,6 @@
 Package: tdcstyle
 Title: Style The Data Collective code
-Version: 0.0.2
+Version: 0.0.3
 Authors@R:c(person("Miles", "McBain", , "miles@thedatacollective.com.au", role = c("aut", "cre")))
 Description: Corral those pesky data.table expressions
 License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
