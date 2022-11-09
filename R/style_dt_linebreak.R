@@ -29,7 +29,6 @@ style_dt_line_break <- function(pd) {
 
   }
 
-
   if (is_dt_let_expr(pd)) {
 
     # move up the first binding of let() onto same line as 'let('

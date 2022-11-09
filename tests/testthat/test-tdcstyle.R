@@ -25,6 +25,16 @@ string_to_format_3 <-
   .(group1, group2)
 ]
 '
+
+string_to_format_4 <-
+'donors[
+  is.na(force_reason) | (is.na(other_reason) & cashemerg_hag_amount >= 1000),
+  let(force_include = "Y",
+      force_reason = "01. High Mid Value Cash/Emerg",
+      pack = "MV"
+      )
+  ]
+'
 # styler: on
 
   styler::cache_deactivate()
@@ -47,4 +57,7 @@ string_to_format_3 <-
     styler::style_text(string_to_format_3, transformers = transformers)
   )
 
+  print(
+    styler::style_text(string_to_format_4, transformers = transformers)
+  )
 })

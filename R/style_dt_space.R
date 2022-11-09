@@ -15,3 +15,10 @@ style_dt_space <- function(pd) {
 
   pd
 }
+
+
+
+function() {
+  pd <- styler:::compute_parse_data_nested("foo[, let(arg1 = 'foo', arg100 = 'baz') ]")
+  pd <- pd$child[[1]]$child[[4]]
+}
