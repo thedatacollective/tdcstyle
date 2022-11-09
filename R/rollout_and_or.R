@@ -8,8 +8,8 @@
 #' @author Miles McBain
 #' @export
 rollout_and_or <- function(pd) {
-  if (is.null(pd)) {
-    return(NULL)
+  if (is.null(pd) | is_list_all_null(pd)) {
+    return(pd)
   }
   if (is_parenthesised(pd)) {
     return(pd)
@@ -18,9 +18,12 @@ rollout_and_or <- function(pd) {
   pd$lag_newlines[and_or_idx] <- 1L
   pd$newlines[and_or_idx - 1] <- 1L
 
-  if (!is.null(pd$child)) {
-    if(any(lapply(pd$child, is.null))) browser()
+  if (!is_list_all_null(pd$child)) {
     pd$child <- lapply(pd$child, rollout_and_or)
   }
   pd
+}
+
+is_list_all_null <- function(x) {
+  is.list(x) && all(all(unlist(lapply(x, is.null))))
 }

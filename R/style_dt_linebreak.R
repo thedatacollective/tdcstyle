@@ -24,7 +24,7 @@ style_dt_line_break <- function(pd) {
     if (has_filter_expr(pd)) {
       first_opening_bracket_idx <- first(which(pd$token == "'['"))
       filter_expr_idx <- first_opening_bracket_idx + 1
-      pd$child[filter_expr_idx] <- rollout_and_or(pd$child[[filter_expr_idx]])
+      pd$child[filter_expr_idx] <- list(rollout_and_or(pd$child[[filter_expr_idx]]))
     }
 
   }
