@@ -9,6 +9,6 @@ tdc_style <- function() {
     token = c(transformers$token, style_dt_token = style_dt_token),
     indention =  c(transformers$indention, style_dt_indentation = style_dt_indention),
     style_guide_name = "tdcstyle@https://gitlab.com/thedatacollective/tdcstyle",
-    style_guide_version = read.dcf(here::here("DESCRIPTION"))[, "Version"]
+    style_guide_version = packageDescription("tdcstyle")[["Version"]]
   )
 }

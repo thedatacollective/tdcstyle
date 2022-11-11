@@ -392,6 +392,12 @@ mailingbase[is.na(ask_base)
             let(ask_base = cash_last_amount,
                  ask_strategy = "Last Cash 1/1.5/2")]
 '
+
+string_to_format_7 <-
+'
+output_ac_counts[, `:=`(Communication = "XMAS WARM Appeal 2022",
+                       `Test Flag` = NA_character_)]
+'
 # styler: on
 
   styler::cache_deactivate()
@@ -412,10 +418,11 @@ mailingbase[is.na(ask_base)
     styler::style_text(string_to_format_4, style = tdc_style)
   )
 
-  styler::style_text(string_to_format_5, style = tdc_style)
-
   print(
     styler::style_text(string_to_format_6, style = tdc_style)
   )
 
+  print(
+    styler::style_text(string_to_format_7, style = tdc_style)
+  )
 })

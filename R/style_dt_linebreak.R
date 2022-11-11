@@ -27,16 +27,28 @@ style_dt_line_break <- function(pd) {
       pd$child[filter_expr_idx] <- list(rollout_and_or(pd$child[[filter_expr_idx]]))
     }
 
+    # start all DT function expressions on a new line
+    dt_function_expr_idexes <-
+      which(
+        vapply(
+          pd$child,
+          is_dt_function_call_expr,
+          logical(1),
+          c("let", ".", "`:=`")
+        )
+      )
+    pd$lag_newlines[dt_function_expr_idexes] <- 1L
+    pd$newlines[dt_function_expr_idexes - 1] <- 1L
   }
 
-  if (is_dt_let_expr(pd)) {
+  if (is_dt_let_expr(pd) | is_dt_dot_paren_expr(pd) | is_backtick_colon_equals_expr(pd)) {
 
-    # move up the first binding of let() onto same line as 'let('
+    # move up the first binding of let() or .() or `:=()` onto same line as "("
     first_opening_paren_idx <- first(which(pd$token == "'('"))
     pd$newlines[first_opening_paren_idx] <- 0L
     pd$lag_newlines[first_opening_paren_idx + 1] <- 0L
 
-    # move up the last ')' of let() if it's followed by ']'
+    # move up the last ')' of let() or .() or `:=()` if it's followed by ']'
     last_closing_paren_idx <- last(which(pd$token == "')'"))
     if (pd$token_after[[last_closing_paren_idx]] == "']'") {
       pd$newlines[last_closing_paren_idx - 1] <- 0L

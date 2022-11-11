@@ -7,6 +7,6 @@
 #' @return
 #' @author Miles McBain
 #' @export
-is_dt_let_expr <- function(let_pd) {
-  is_dt_function_call_expr(let_pd, "let")
+is_backtick_colon_equals_expr <- function(pd) {
+  is_dt_function_call_expr(pd, "`:=`")
 }
