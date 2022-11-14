@@ -20,3 +20,7 @@ remotes::install_gitlab("thedatacollective/tdcstyle")
   "args": "styler::style_file('$$', style = tdcstyle::tdc_style)"
 },
 ```
+
+# Progress, Suggestions, and Discussion on the Basecmap
+
+https://3.basecamp.com/5486968/projects/30071517
