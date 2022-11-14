@@ -10,6 +10,11 @@
 style_dt_line_break <- function(pd) {
 
   if (is_dt_expr(pd)) {
+
+    # Don't mess with it, if it's all on one line.
+    if (is_one_line_expr(pd)) return(pd)
+
+    # Move up closing ']'
     pd$newlines[pd$token_after == "']'"] <- 0L
     pd$lag_newlines[pd$token == "']'"] <- 0L
 
@@ -27,18 +32,17 @@ style_dt_line_break <- function(pd) {
       pd$child[filter_expr_idx] <- list(rollout_and_or(pd$child[[filter_expr_idx]]))
     }
 
-    # start all DT function expressions on a new line
-    dt_function_expr_idexes <-
-      which(
+    # start all DT function expressions, that don't follow an '=', on a new line
+    lhs_exprs <- pd$token_before != "EQ_SUB"
+    dt_function_exprs <-
         vapply(
           pd$child,
           is_dt_function_call_expr,
           logical(1),
           c("let", ".", "`:=`")
         )
-      )
-    pd$lag_newlines[dt_function_expr_idexes] <- 1L
-    pd$newlines[dt_function_expr_idexes - 1] <- 1L
+    pd$lag_newlines[lhs_exprs & dt_function_exprs] <- 1L
+    pd$newlines[which(lhs_exprs & dt_function_exprs) - 1] <- 1L
   }
 
   if (is_dt_let_expr(pd) | is_dt_dot_paren_expr(pd) | is_backtick_colon_equals_expr(pd)) {

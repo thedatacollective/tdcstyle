@@ -398,6 +398,28 @@ string_to_format_7 <-
 output_ac_counts[, `:=`(Communication = "XMAS WARM Appeal 2022",
                        `Test Flag` = NA_character_)]
 '
+string_to_format_8 <-
+'mb_w2[
+  donors,
+  on = .(urn),
+  let(title = i.title)
+]
+'
+
+string_to_format_9 <-
+'
+mb_w2[
+  is.na(segment)
+  & urn %in% trans[appeal_code %ilike% "FLOOD" & year == 2022, urn]
+  & donor_type == "emergency",
+  let(segment = "Flood Emergency",
+      group_code = "FE")]
+'
+
+string_to_format_10 <-
+'
+trans[appeal_code %ilike% "FLOOD" & year == 2022, urn]
+'
 # styler: on
 
   styler::cache_deactivate()
@@ -424,5 +446,17 @@ output_ac_counts[, `:=`(Communication = "XMAS WARM Appeal 2022",
 
   print(
     styler::style_text(string_to_format_7, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_8, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_9, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_10, style = tdc_style)
   )
 })
