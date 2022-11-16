@@ -33,7 +33,9 @@ style_dt_line_break <- function(pd) {
     }
 
     # start all DT function expressions, that don't follow an '=', on a new line
-    lhs_exprs <- pd$token_before != "EQ_SUB"
+    lag_token <- c("NO_TOKEN", pd$token[-length(pd$token)])
+    lhs_exprs <- lag_token != "EQ_SUB"
+    pd$token
     dt_function_exprs <-
         vapply(
           pd$child,
@@ -41,6 +43,7 @@ style_dt_line_break <- function(pd) {
           logical(1),
           c("let", ".", "`:=`")
         )
+    pd$text[lhs_exprs & dt_function_exprs]
     pd$lag_newlines[lhs_exprs & dt_function_exprs] <- 1L
     pd$newlines[which(lhs_exprs & dt_function_exprs) - 1] <- 1L
   }
@@ -66,5 +69,5 @@ style_dt_line_break <- function(pd) {
 
 function() {
   pd <- styler:::compute_parse_data_nested("foo[is.na(remove_dm1) & beq_consider == 1 | flag_something == 1, ]")
-  pd$child[[1]]$child[[3]]
+  pd$child[[4]]
 }

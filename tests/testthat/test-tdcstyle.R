@@ -432,6 +432,12 @@ mailingbase[, .(
   )
 ]
 '
+
+string_to_format_12 <-
+'
+mailingbase[, let(VP1 = NA_character_,
+  VP2 = NA_character_)]
+'
 # styler: on
 
   styler::cache_deactivate()
@@ -474,5 +480,9 @@ mailingbase[, .(
 
   print(
     styler::style_text(string_to_format_11, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_12, style = tdc_style)
   )
 })
