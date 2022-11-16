@@ -24,6 +24,11 @@ style_dt_line_break <- function(pd) {
       pd$newlines[first_bracket_idx] <- 0L
       pd$lag_newlines[first_bracket_idx + 1] <- 0L
     }
+    # if the thing that follows the [ is not a ',', push it down
+    if (pd$token_after[first_bracket_idx] != "','") {
+      pd$newlines[first_bracket_idx] <- 1L
+      pd$lag_newlines[first_bracket_idx + 1] <- 1L
+    }
 
     # if it has compound filter with & and | split those onto new lines
     if (has_filter_expr(pd)) {

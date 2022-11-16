@@ -438,6 +438,27 @@ string_to_format_12 <-
 mailingbase[, let(VP1 = NA_character_,
   VP2 = NA_character_)]
 '
+
+string_to_format_13 <-
+'
+gift_check <-
+  trans[year > year(Sys.Date()) - 3
+  & classification_code %in% c(
+      classification_code("Cash"),
+      classification_code("Capital Campaign"),
+      classification_code("Emergency")
+    ),
+  .(num_gift = .N,
+    min_gift = min(amount),
+    max_gift = max(amount),
+    last_gift_3 = amount[.N - 3],
+    last_gift_2 = amount[.N - 2],
+    last_gift_1 = amount[.N - 1],
+    last_gift = amount[.N],
+    avg_gift = mean(amount)
+  ),
+  by = urn]
+'
 # styler: on
 
   styler::cache_deactivate()
@@ -484,5 +505,9 @@ mailingbase[, let(VP1 = NA_character_,
 
   print(
     styler::style_text(string_to_format_12, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_13, style = tdc_style)
   )
 })
