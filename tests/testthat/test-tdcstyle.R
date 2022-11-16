@@ -420,6 +420,18 @@ string_to_format_10 <-
 '
 trans[appeal_code %ilike% "FLOOD" & year == 2022, urn]
 '
+
+string_to_format_11 <-
+'
+mailingbase[, .(
+    this = that + 1,
+      foo = func(bar)
+  ),
+  .(
+    foo, bar
+  )
+]
+'
 # styler: on
 
   styler::cache_deactivate()
@@ -458,5 +470,9 @@ trans[appeal_code %ilike% "FLOOD" & year == 2022, urn]
 
   print(
     styler::style_text(string_to_format_10, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_11, style = tdc_style)
   )
 })

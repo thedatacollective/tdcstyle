@@ -52,12 +52,10 @@ style_dt_line_break <- function(pd) {
     pd$newlines[first_opening_paren_idx] <- 0L
     pd$lag_newlines[first_opening_paren_idx + 1] <- 0L
 
-    # move up the last ')' of let() or .() or `:=()` if it's followed by ']'
+    # move up the last ')' of let() or .() or `:=()`
     last_closing_paren_idx <- last(which(pd$token == "')'"))
-    if (pd$token_after[[last_closing_paren_idx]] == "']'") {
-      pd$newlines[last_closing_paren_idx - 1] <- 0L
-      pd$lag_newlines[last_closing_paren_idx] <- 0L
-    }
+    pd$newlines[last_closing_paren_idx - 1] <- 0L
+    pd$lag_newlines[last_closing_paren_idx] <- 0L
 
   }
 
