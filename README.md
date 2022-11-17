@@ -13,6 +13,8 @@ remotes::install_gitlab("thedatacollective/tdcstyle")
 
 ## VSCode Binding
 
+From the command palette acessed `Preferences: Open Keyboard Shortcuts (JSON)`, and add a new binding like:
+
 ```json
 {
   "key": "<YOUR BINDING>",
