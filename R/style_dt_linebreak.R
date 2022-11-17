@@ -40,7 +40,6 @@ style_dt_line_break <- function(pd) {
     # start all DT function expressions, that don't follow an '=', on a new line
     lag_token <- c("NO_TOKEN", pd$token[-length(pd$token)])
     lhs_exprs <- lag_token != "EQ_SUB"
-    pd$token
     dt_function_exprs <-
         vapply(
           pd$child,

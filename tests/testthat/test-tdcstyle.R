@@ -400,8 +400,7 @@ output_ac_counts[, `:=`(Communication = "XMAS WARM Appeal 2022",
 '
 string_to_format_8 <-
 'mb_w2[
-  donors,
-  on = .(urn),
+  donors, on = .(urn, key2),
   let(title = i.title)
 ]
 '
@@ -473,6 +472,31 @@ mailingbase[
   )
 ]
 '
+string_to_format_15 <-
+'
+mailingbase[
+  is.na(VP1),
+  let(
+    VP1 = fcase(
+      segment == "Active Bequest",
+      "1.1 Active Bequests (AB)",
+      segment == "Active Donors",
+      "1.2 Active Donors (AD)",
+      segment == "Flood Emergency",
+      "1.3 Flood Emergency",
+      segment == "Lapsed Donors",
+      "1.4 Lapsed Donors (LD)",
+      segment == "Newly Acquired Donors -first gift < 3mth (ND)",
+      "1.7 Newly Acquired Donors (NAD)",
+      segment == "Regular Givers + Cash",
+      "1.8 Regular Givers Plus Cash (RG_Cash)",
+      segment == "Religious Donor",
+      "1.9 Religious Donors (RD)",
+      default = "1.10 Standard Value/Default (SV_D)"
+    )
+  )
+]
+'
 
 # styler: on
 
@@ -528,6 +552,10 @@ mailingbase[
 
   print(
     styler::style_text(string_to_format_14, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_15, style = tdc_style)
   )
 
 })
