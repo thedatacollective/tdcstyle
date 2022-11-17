@@ -502,59 +502,64 @@ mailingbase[
 
   styler::cache_deactivate()
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_2, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_3, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_4, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_6, style = tdc_style)
   )
 
-  print(
+  res <- styler::style_text(string_to_format_5, style = tdc_style)
+  expect_true(
+    all(!is.na(res)) & all(!is.null(res))
+  )
+
+  expect_snapshot(
     styler::style_text(string_to_format_7, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_8, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_9, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_10, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_11, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_12, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_13, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_14, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_15, style = tdc_style)
   )
 
