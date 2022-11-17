@@ -459,6 +459,21 @@ gift_check <-
   ),
   by = urn]
 '
+
+string_to_format_14 <-
+'
+mailingbase[
+  ask1_number >= 5000,
+  `:=`(
+    ask1 = NA,
+    ask2 = NA,
+    ask3 = NA,
+    ask_override = "My Choice",
+    ask_strategy = "My Choice"
+  )
+]
+'
+
 # styler: on
 
   styler::cache_deactivate()
@@ -510,4 +525,9 @@ gift_check <-
   print(
     styler::style_text(string_to_format_13, style = tdc_style)
   )
+
+  print(
+    styler::style_text(string_to_format_14, style = tdc_style)
+  )
+
 })

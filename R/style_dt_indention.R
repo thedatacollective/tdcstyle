@@ -10,7 +10,7 @@
 style_dt_indention <- function(pd) {
 
   # if it's a let expression vertically align the args by adding 2 extra spaces
-  if (is_dt_let_expr(pd)) {
+  if (is_dt_function_call_expr(pd, c("let", "`:=`"))) {
     opening_paren_idx <- first(which(pd$token == "'('"))
     closing_paren_idx <- last(which(pd$token == "')'"))
     interior_idxs <- clamp(seq_along(pd$token), min = opening_paren_idx, max = closing_paren_idx)

@@ -53,7 +53,7 @@ style_dt_line_break <- function(pd) {
     pd$newlines[which(lhs_exprs & dt_function_exprs) - 1] <- 1L
   }
 
-  if (is_dt_let_expr(pd) | is_dt_dot_paren_expr(pd) | is_backtick_colon_equals_expr(pd)) {
+  if (is_dt_function_call_expr(pd, c("let", "`:=`", "."))) {
 
     # move up the first binding of let() or .() or `:=()` onto same line as "("
     first_opening_paren_idx <- first(which(pd$token == "'('"))
