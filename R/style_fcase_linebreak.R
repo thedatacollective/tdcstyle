@@ -1,6 +1,5 @@
 style_fcase_linebreak <- function(pd) {
   if (is_dt_function_call_expr(pd, "fcase")) {
-    browser()
     lag_token <- c("NO_TOKEN", pd$token[-length(pd$token)])
     lhs_exprs <- pd$token == "expr" & lag_token != "EQ_SUB"
     lhs_exprs[1] <- FALSE #fcase
