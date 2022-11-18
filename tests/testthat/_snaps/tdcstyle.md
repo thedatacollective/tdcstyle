@@ -193,3 +193,15 @@
         let(ask1 = x1,
             ask2 = x1.5, ask3 = x2)]
 
+---
+
+    Code
+      withr::with_options(new = list(tdcstyle.expand_args = TRUE), styler::style_text(
+        string_to_format_18, style = tdc_style))
+    Output
+      
+      styler::style_text(selection$text,
+        foo = "boo",
+        style = tdc_style
+      )
+

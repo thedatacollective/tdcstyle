@@ -508,6 +508,13 @@ mailingbase[
     let(ask1 = x1,
     ask2 = x1.5, ask3 = x2)]
 '
+
+string_to_format_18 <- '
+styler::style_text(selection$text,
+  foo = "boo", style = tdc_style
+  )
+'
+
 # styler: on
 
   styler::cache_deactivate()
@@ -580,5 +587,13 @@ mailingbase[
   expect_snapshot(
     styler::style_text(string_to_format_17, style = tdc_style)
   )
+
+  expect_snapshot(
+    withr::with_options(
+      new = list(tdcstyle.expand_args = TRUE),
+      styler::style_text(string_to_format_18, style = tdc_style)
+    )
+  )
+
 
 })

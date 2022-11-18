@@ -3,6 +3,8 @@
 
 `{tdcstyle}` provides `tdc_style` a data.table focussed extension to `tidyvers_style` for `{styler}`.
 
+The `style()` function styles the active file, or the active text selection (if made), with preference given to active selection.
+
 ## Installation
 
 You can install the development version of tdcstyle like so:
@@ -17,8 +19,8 @@ From the command palette acessed `Preferences: Open Keyboard Shortcuts (JSON)`, 
 ```json
 {
   "key": "<YOUR BINDING>",
-  "command": "r.runCommandWithEditorPath",
-  "args": "styler::style_file('$$', style = tdcstyle::tdc_style)"
+  "command": "r.runCommand",
+  "args": "tdcstyle::style()"
 },
 ```
 
