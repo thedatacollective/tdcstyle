@@ -49,31 +49,3 @@ find_closing_paren <- function(tokens, opening_paren_idx) {
 crop_before_idx <- function(vec, idx) {
   tail(vec, length(vec) - (idx - 1))
 }
-
-
-function() {
-  pd <- styler:::compute_parse_data_nested("
-	foo <- function(a,
-	b, c) {
-    print(a)
-	}
-	")
-  pd$child[[1]]$child[[3]]
-
-  pd <- styler:::compute_parse_data_nested("
-  fun(a,
-	b, x[1,2])
-	")
-  pd$child[[1]]
-
-	styler::style_text(
-	'
-donors[
-  urn %in% c(182929, 43288, 273054, 273532, 273137, 275541),
-  `:=`(remove_dm1 = "QC Exclusion",
-    remove_dm2 = "QC Exclusion",
-    remove_dm3 = "QC Exclusion")]
-	',
-	style = tdc_style
-	)
-}
