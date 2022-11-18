@@ -178,8 +178,7 @@
     Output
       
       foo <- function(a, # my comment
-                      b,
-                      c) {
+                      b, c) {
         print(a)
       }
 
@@ -192,6 +191,5 @@
       .[ask_conversion,
         on = .(ask_base >= from, ask_base <= to),
         let(ask1 = x1,
-            ask2 = x1.5,
-            ask3 = x2)]
+            ask2 = x1.5, ask3 = x2)]
 

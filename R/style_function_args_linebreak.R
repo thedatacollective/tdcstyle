@@ -1,7 +1,7 @@
 style_function_args_linebreak <- function(pd) {
 
   # Is this a function(a,b,c) or fun(a,b,c)?
-  if (is_generic_function_call(pd)) {
+  if (is_generic_function_call(pd) && getOption("tdcstyle.expand_args", FALSE)) {
     opening_paren_idx <- first(which(pd$token == "'('"))
     closing_paren_idx <- find_closing_paren(pd$token, opening_paren_idx)
 
