@@ -1,6 +1,6 @@
 style_function_args_linebreak <- function(pd) {
 
-  # Is this a function(a,b,c) of fun(a,b,c)?
+  # Is this a function(a,b,c) or fun(a,b,c)?
   if (is_generic_function_call(pd)) {
     opening_paren_idx <- first(which(pd$token == "'('"))
     closing_paren_idx <- find_closing_paren(pd$token, opening_paren_idx)
