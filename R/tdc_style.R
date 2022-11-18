@@ -4,8 +4,10 @@ tdc_style <- function() {
   styler::create_style_guide(
     line_break =
       c(transformers$line_break,
+        style_function_args_linebreak = style_function_args_linebreak,
         style_dt_line_break = style_dt_line_break,
-        style_fcase_linebreak = style_fcase_linebreak),
+        style_fcase_linebreak = style_fcase_linebreak
+        ),
     space =
       c(transformers$space, style_dt_space = style_dt_space),
     token = c(transformers$token, style_dt_token = style_dt_token),
