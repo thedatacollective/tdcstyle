@@ -40,11 +40,3 @@ place_newlines <- function(index_pool, results = integer(0)) {
     ))
   }
 }
-
-function(x) {
-  paint::ipaint(pd)
-
-  pd$text[lhs_exprs]
-  which(drop_line_breaks) + 1
-  which(lhs_exprs)
-}

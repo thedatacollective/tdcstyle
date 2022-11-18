@@ -426,9 +426,7 @@ mailingbase[, .(
     this = that + 1,
       foo = func(bar)
   ),
-  .(
-    foo, bar
-  )
+  .(foo, bar)
 ]
 '
 
@@ -497,7 +495,19 @@ mailingbase[
   )
 ]
 '
+ string_to_format_16 <- '
+	foo <- function(a, # my comment
+	b, c) {
+    print(a)
+	}
+'
 
+ string_to_format_17 <- '
+	 .[ask_conversion,
+    on = .(ask_base >= from, ask_base <= to),
+    let(ask1 = x1,
+    ask2 = x1.5, ask3 = x2)]
+'
 # styler: on
 
   styler::cache_deactivate()
@@ -561,6 +571,14 @@ mailingbase[
 
   expect_snapshot(
     styler::style_text(string_to_format_15, style = tdc_style)
+  )
+
+  expect_snapshot(
+    styler::style_text(string_to_format_16, style = tdc_style)
+  )
+
+  expect_snapshot(
+    styler::style_text(string_to_format_17, style = tdc_style)
   )
 
 })

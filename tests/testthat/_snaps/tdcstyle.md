@@ -171,3 +171,27 @@
             default = "1.10 Standard Value/Default (SV_D)"
           ))]
 
+---
+
+    Code
+      styler::style_text(string_to_format_16, style = tdc_style)
+    Output
+      
+      foo <- function(a, # my comment
+                      b,
+                      c) {
+        print(a)
+      }
+
+---
+
+    Code
+      styler::style_text(string_to_format_17, style = tdc_style)
+    Output
+      
+      .[ask_conversion,
+        on = .(ask_base >= from, ask_base <= to),
+        let(ask1 = x1,
+            ask2 = x1.5,
+            ask3 = x2)]
+
