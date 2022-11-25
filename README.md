@@ -1,7 +1,7 @@
 
 # tdcstyle
 
-`{tdcstyle}` provides `tdc_style` a data.table focussed extension to `tidyvers_style` for `{styler}`.
+`{tdcstyle}` provides `tdc_style` an opinionated `{data.table}` styler that builds on `tidyvers_style` for `{styler}`. It tries, with varying success to, balance readability with concise expressions.
 
 The `style()` function styles the active file, or the active text selection (if made), with preference given to active selection.
 
@@ -12,6 +12,54 @@ You can install the development version of tdcstyle like so:
 ``` r
 remotes::install_gitlab("thedatacollective/tdcstyle")
 ```
+
+# Usage
+
+  - Plug it into styler with: `styler::style_file(<path>, style = tdcstyle::tdc_style)`
+  - OR make a binding for `tdcstyle::style()` which uses the `{rstudioapi}` to style the active file or actively selected text.
+
+# Highlights
+
+* Split out filters onto new lines, lead by `&` and `|`. Parenthesised parts of the filter are not split.
+* argument alignment for `let`
+* pull up trailing brackets
+* In multiline expressions, push filter onto a new line
+
+```r
+      donors[
+        is.na(force_reason)
+        | (is.na(other_reason) & cashemerg_hag_amount >= 1000),
+        let(force_include = "Y",
+            force_reason = "01. High Mid Value Cash/Emerg",
+            pack = "MV")]
+```
+
+* Put internal data.table syntax sugar functions on new lines:
+
+```r
+      mailingbase[,
+        .(this = that + 1,
+          foo = func(bar)),
+        .(foo, bar)]
+
+```
+
+* Pair `fcase` condition / expressions on same lines:
+
+```r
+
+      mailingbase[
+        is.na(VP1),
+        let(VP1 = fcase(
+            segment == "Active Donors", "1.2 Active Donors (AD)",
+            segment == "Flood Emergency", "1.3 Flood Emergency"
+            default == "Standard"
+            ))]
+
+```
+
+* Substitute `:=()` for `let()`
+
 ## VSCode Binding
 
 From the command palette acessed `Preferences: Open Keyboard Shortcuts (JSON)`, and add a new binding like:
@@ -24,11 +72,8 @@ From the command palette acessed `Preferences: Open Keyboard Shortcuts (JSON)`, 
 },
 ```
 
+* RStudio users can do something similar with [{shrtcts}](https://github.com/gadenbuie/shrtcts).
+
 # Options
 
 - `tdcstyle.exapnd_args` Set to `TRUE` to enable `{grrkstyle}`-esque expassion of function arguments onto new lines. `FALSE` by default.
-
-
-# Progress, Suggestions, and Discussion on the Basecmap
-
-https://3.basecamp.com/5486968/projects/30071517

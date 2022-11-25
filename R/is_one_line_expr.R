@@ -1,12 +1,3 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param pd
-#' @return
-#' @author Miles McBain
-#' @export
 is_one_line_expr <- function(pd) {
 
   if (is_list_all_null(pd) | is.null(pd)) return(TRUE)

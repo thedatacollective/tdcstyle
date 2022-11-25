@@ -205,3 +205,14 @@
         style = tdc_style
       )
 
+---
+
+    Code
+      styler::style_text(string_to_format_19, style = tdc_style)
+    Output
+      
+      dt <- rbindlist(list(
+        dt1, dt2,
+        dt3, dt4
+      ), fill = TRUE)
+

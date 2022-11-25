@@ -515,6 +515,12 @@ styler::style_text(selection$text,
   )
 '
 
+string_to_format_19 <- '
+dt <- rbindlist(list(
+  dt1, dt2,
+  dt3, dt4), fill = TRUE)
+'
+
 # styler: on
 
   styler::cache_deactivate()
@@ -595,5 +601,8 @@ styler::style_text(selection$text,
     )
   )
 
+  expect_snapshot(
+      styler::style_text(string_to_format_19, style = tdc_style)
+  )
 
 })

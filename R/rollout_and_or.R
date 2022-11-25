@@ -1,12 +1,3 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param nameme1
-#' @return
-#' @author Miles McBain
-#' @export
 rollout_and_or <- function(pd) {
   if (is.null(pd) | is_list_all_null(pd)) {
     return(pd)

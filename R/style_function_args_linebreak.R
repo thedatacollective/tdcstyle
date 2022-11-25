@@ -47,5 +47,5 @@ find_closing_paren <- function(tokens, opening_paren_idx) {
 }
 
 crop_before_idx <- function(vec, idx) {
-  tail(vec, length(vec) - (idx - 1))
+  utils::tail(vec, length(vec) - (idx - 1))
 }

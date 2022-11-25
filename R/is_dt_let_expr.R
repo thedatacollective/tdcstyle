@@ -1,12 +1,3 @@
-#' .. content for \description{} (no empty lines) ..
-#'
-#' .. content for \details{} ..
-#'
-#' @title
-#' @param pd
-#' @return
-#' @author Miles McBain
-#' @export
 is_dt_let_expr <- function(let_pd) {
   is_dt_function_call_expr(let_pd, "let")
 }

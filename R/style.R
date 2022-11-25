@@ -6,6 +6,9 @@
 #'  on a new line
 #' @export
 style <- function(expand_args = getOption("tdcstyle.expand_args", FALSE)) {
+  if (!requireNamespace("rstudioapi", quietly = TRUE)) {
+    stop("style() needs the {rstudioapi} package to interact with your editor.")
+  }
   selection_context <- rstudioapi::getSourceEditorContext()
   selection <- rstudioapi::primary_selection(selection_context)
 
