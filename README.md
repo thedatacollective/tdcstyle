@@ -5,6 +5,8 @@
 
 The `style()` function styles the active file, or the active text selection (if made), with preference given to active selection.
 
+*Note:* This is built for the dev version of `{data.table}` that makes use of the `let()` function. A much nicer alternative to `:=()`.
+
 ## Installation
 
 You can install the development version of tdcstyle like so:
