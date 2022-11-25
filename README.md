@@ -1,7 +1,7 @@
 
 # tdcstyle
 
-`{tdcstyle}` provides `tdc_style` an opinionated `{data.table}` styler that builds on `tidyvers_style` for `{styler}`. It tries, with varying success to, balance readability with concise expressions.
+`{tdcstyle}` provides `tdc_style`, an opinionated `{data.table}` styler that builds on `tidyvers_style` for `{styler}`. It tries, with varying success to, balance readability with concise expressions.
 
 The `style()` function styles the active file, or the active text selection (if made), with preference given to active selection.
 
