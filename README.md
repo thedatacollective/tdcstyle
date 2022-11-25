@@ -10,7 +10,7 @@ The `style()` function styles the active file, or the active text selection (if 
 You can install the development version of tdcstyle like so:
 
 ``` r
-remotes::install_gitlab("thedatacollective/tdcstyle")
+remotes::install_github("thedatacollective/tdcstyle")
 ```
 
 # Usage
