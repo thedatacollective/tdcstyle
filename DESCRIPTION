@@ -1,6 +1,6 @@
 Package: tdcstyle
 Title: Style data.table according to the opinions of TheDataCollective
-Version: 0.1.2
+Version: 0.1.3
 Authors@R: c(person("Miles", "McBain", , "miles@thedatacollective.com.au", role = c("aut", "cre"),
     person("The Data Collective Consulting Pty Ltd", role = "cph")))
 Description: An extenstion of styler::tidyverse_style() for {data.table}.

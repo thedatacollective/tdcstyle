@@ -521,6 +521,17 @@ dt <- rbindlist(list(
   dt3, dt4), fill = TRUE)
 '
 
+string_to_format_20 <- '
+mailingbase[,
+  let(
+    var = fcase(
+      option1_flag == "thing", "option 1 thing",
+      option1_flag == "other thing", "option 1 other thing"
+    )
+  )
+]
+'
+
 # styler: on
 
   styler::cache_deactivate()
@@ -603,6 +614,10 @@ dt <- rbindlist(list(
 
   expect_snapshot(
       styler::style_text(string_to_format_19, style = tdc_style)
+  )
+
+  expect_snapshot(
+      styler::style_text(string_to_format_20, style = tdc_style)
   )
 
 })

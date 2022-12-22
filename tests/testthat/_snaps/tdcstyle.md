@@ -216,3 +216,15 @@
         dt3, dt4
       ), fill = TRUE)
 
+---
+
+    Code
+      styler::style_text(string_to_format_20, style = tdc_style)
+    Output
+      
+      mailingbase[,
+        let(var = fcase(
+            option1_flag == "thing", "option 1 thing",
+            option1_flag == "other thing", "option 1 other thing"
+          ))]
+

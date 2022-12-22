@@ -4,17 +4,29 @@ style_fcase_linebreak <- function(pd) {
     lhs_exprs <- pd$token == "expr" & lag_token != "EQ_SUB"
     lhs_exprs[1] <- FALSE #fcase
 
-    # drop all newlines
-    pd$newlines[which(lhs_exprs) + 1] <- 0L # + 1 to get us to the comma
-    pd$lag_newlines[which(lhs_exprs) + 1 + 1] <- 0L
+    # drop newlines after commas
+    lhs_expr_ind <- which(lhs_exprs)
+    lhs_expr_trailing_commas <- pd$text[lhs_expr_ind + 1] == ","
+    lhs_expr_trailing_comma_ind <- lhs_expr_ind[lhs_expr_trailing_commas] + 1
+    pd$newlines[lhs_expr_trailing_comma_ind] <- 0L
+    pd$lag_newlines[lhs_expr_trailing_comma_ind + 1] <- 0L
 
-    exprs_newline_to_follow <- place_newlines(which(lhs_exprs))
+    # set newlines
+    # set them after the commas for expressions that have them trailing
+    # and possibly not after the comma, just after the expression for those that don't
+    # a lhs expression that is the last one with no `default` follow will not have a tailing comma
+    lhs_exp_no_trailing_comma_ind <- lhs_expr_ind[!lhs_expr_trailing_commas]
+
+    exprs_newline_to_follow <- setdiff(place_newlines(which(lhs_exprs)), lhs_exp_no_trailing_comma_ind)
     pd$newlines[exprs_newline_to_follow + 1] <- 1L # + 1 to get us to the comma
     pd$lag_newlines[exprs_newline_to_follow + 1 + 1] <- 1L
+
+    # and finally something that has no comma, so it must be the last thing
+    pd$newlines[lhs_exp_no_trailing_comma_ind] <- 1L
+    pd$lag_newlines[lhs_exp_no_trailing_comma_ind + 1] <- 1L
   }
   pd
 }
-
 
 place_newlines <- function(index_pool, results = integer(0)) {
   if (length(index_pool) == 1) return(c(results, index_pool[[1]]))
