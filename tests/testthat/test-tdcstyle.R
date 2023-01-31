@@ -532,6 +532,22 @@ mailingbase[,
 ]
 '
 
+string_to_format_21 <- '
+   substitute2(
+        mailingbase[
+          !is.na(duplicate_group_name),
+          let(primary_record_name = fcase(
+              strategy == "first", indicate_first(.N),
+              stragety == "last", indicate_last(.N)
+            )),
+          .(group)],
+        list(
+          primary_record_name = primary_record_name,
+          duplicate_group_name = duplicate_group_name
+        )
+      )
+'
+
 # styler: on
 
   styler::cache_deactivate()
@@ -620,4 +636,7 @@ mailingbase[,
       styler::style_text(string_to_format_20, style = tdc_style)
   )
 
+  expect_snapshot(
+    styler::style_text(string_to_format_21, style = tdc_style)
+  )
 })

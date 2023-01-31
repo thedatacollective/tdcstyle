@@ -228,3 +228,23 @@
             option1_flag == "other thing", "option 1 other thing"
           ))]
 
+---
+
+    Code
+      styler::style_text(string_to_format_21, style = tdc_style)
+    Output
+      
+      substitute2(
+        mailingbase[
+          !is.na(duplicate_group_name),
+          let(primary_record_name = fcase(
+              strategy == "first", indicate_first(.N),
+              stragety == "last", indicate_last(.N)
+            )),
+          .(group)],
+        list(
+          primary_record_name = primary_record_name,
+          duplicate_group_name = duplicate_group_name
+        )
+      )
+
