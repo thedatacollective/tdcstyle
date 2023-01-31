@@ -548,6 +548,14 @@ string_to_format_21 <- '
       )
 '
 
+string_to_format_22 <- '
+    dm_top_2000_threshold <-
+      mailingbase[
+        is.na(remove_dm1)
+        & !is.na(cash_hag_amount),
+        cash_hag_rank][2000]
+'
+
 # styler: on
 
   styler::cache_deactivate()
@@ -638,5 +646,9 @@ string_to_format_21 <- '
 
   expect_snapshot(
     styler::style_text(string_to_format_21, style = tdc_style)
+  )
+
+  print(
+    styler::style_text(string_to_format_22, style = tdc_style)
   )
 })

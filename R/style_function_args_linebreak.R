@@ -22,30 +22,3 @@ style_function_args_linebreak <- function(pd) {
 
 	pd
 }
-
-find_closing_paren <- function(tokens, opening_paren_idx) {
-  search_vec <- crop_before_idx(tokens, opening_paren_idx)
-
-  paren_level <-
-    Reduce(
-      function(x, y) {
-        if (y == "'('") {
-          x <- x + 1
-        } else if (y == "')'") {
-          x <- x - 1
-        } else {
-          x
-        }
-      },
-      search_vec,
-      init = 0,
-      accumulate = TRUE
-    )
-
-	max(which(paren_level == 1)) + (opening_paren_idx - 1)
-
-}
-
-crop_before_idx <- function(vec, idx) {
-  utils::tail(vec, length(vec) - (idx - 1))
-}

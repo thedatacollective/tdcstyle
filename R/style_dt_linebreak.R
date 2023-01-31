@@ -3,7 +3,20 @@ style_dt_line_break <- function(pd) {
   if (is_dt_expr(pd)) {
 
     # Don't mess with it, if it's all on one line.
-    if (is_one_line_expr(pd)) return(pd)
+    # in <expression_a>[<expression_b>] we only care if
+    # [<expression_b>] is on one line, since <expression_a> could be a
+    # chained DT expresison or function call that spans multiple lines
+    opening_bracket_idx <- first(which(pd$token == "'['"))
+    closing_bracket_idx <- find_closing_paren(
+      pd$token,
+      opening_bracket_idx,
+      open_paren_token = "'['",
+      close_paren_token = "']'"
+    )
+    dt_expression_scope <- seq(opening_bracket_idx, closing_bracket_idx)
+    if (is_one_line_expr(pd[dt_expression_scope, ])) {
+      return(pd)
+    }
 
     # Move up closing ']'
     pd$newlines[pd$token_after == "']'"] <- 0L
@@ -39,12 +52,12 @@ style_dt_line_break <- function(pd) {
     lag_token <- c("NO_TOKEN", pd$token[-length(pd$token)])
     lhs_exprs <- lag_token != "EQ_SUB"
     dt_function_exprs <-
-        vapply(
-          pd$child,
-          is_dt_function_call_expr,
-          logical(1),
-          c("let", ".", "`:=`")
-        )
+      vapply(
+        pd$child,
+        is_dt_function_call_expr,
+        logical(1),
+        c("let", ".", "`:=`")
+      )
     pd$text[lhs_exprs & dt_function_exprs]
     pd$lag_newlines[lhs_exprs & dt_function_exprs] <- 1L
     pd$newlines[which(lhs_exprs & dt_function_exprs) - 1] <- 1L
