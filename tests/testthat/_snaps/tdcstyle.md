@@ -248,3 +248,15 @@
         )
       )
 
+---
+
+    Code
+      styler::style_text(string_to_format_22, style = tdc_style)
+    Output
+      
+      dm_top_2000_threshold <-
+        mailingbase[
+          is.na(remove_dm1)
+          & !is.na(cash_hag_amount),
+          cash_hag_rank][2000]
+

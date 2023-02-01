@@ -648,7 +648,7 @@ string_to_format_22 <- '
     styler::style_text(string_to_format_21, style = tdc_style)
   )
 
-  print(
+  expect_snapshot(
     styler::style_text(string_to_format_22, style = tdc_style)
   )
 })
